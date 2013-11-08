@@ -1,0 +1,33 @@
+
+include /commun/data/packages/tools.mk
+
+
+GTF=/commun/data/pubdb/ucsc/mm10
+
+INDIR=../align/merged.bam
+OUTDIR=../align/cufflinks
+
+
+PHONY=all clean
+
+
+all:  ${OUTDIR}/30VGWT2/transcripts.gtf  ${OUTDIR}/45VGKM3/transcripts.gtf  ${OUTDIR}/6VGKS3/transcripts.gtf 
+
+
+${OUTDIR}/30VGWT2/transcripts.gtf: ${INDIR}/30VGWT2.bam
+	mkdir -p ${OUTDIR} && \
+	${CUFFLINKS.dir}/cufflinks -p 20 -o ${OUTDIR}/30VGWT2 ${INDIR}/30VGWT2.bam
+
+
+${OUTDIR}/45VGKM3/transcripts.gtf: ${INDIR}/45VGKM3.bam
+	mkdir -p ${OUTDIR} && \
+	${CUFFLINKS.dir}/cufflinks -p 20 -o ${OUTDIR}/45VGKM3 ${INDIR}/45VGKM3.bam
+
+
+${OUTDIR}/6VGKS3/transcripts.gtf: ${INDIR}/6VGKS3.bam
+	mkdir -p ${OUTDIR} && \
+	${CUFFLINKS.dir}/cufflinks -p 20 -o ${OUTDIR}/6VGKS3 ${INDIR}/6VGKS3.bam
+
+
+
+

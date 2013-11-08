@@ -1,0 +1,128 @@
+include /commun/data/packages/tools.mk
+FASTQC=$(packages.dir)/FastQC/fastqc
+
+INDIR=../fastqrnaseq/Project_RNAseqSCN5A/fastqcutadapt-a
+OUTDIR=../align
+
+PHONY=all clean
+all:  30VGKM1  30VGKM2  30VGKM3  30VGKS1  30VGKS2  30VGKS3  30VGWT1  30VGWT3  45VGKM1  45VGKM2  45VGKS1  45VGKS2  45VGKS3  45VGWT1  45VGWT2  45VGWT3  6VGKM1  6VGKM2  6VGKM3  6VGKS1  6VGKS2  6VGWT1  6VGWT2  6VGWT3 
+
+30VGKM1: $(wildcard $(INDIR)/30VGKM1*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/30VGKM1/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/30VGKM1 $^ 
+
+
+30VGKM2: $(wildcard $(INDIR)/30VGKM2*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/30VGKM2/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/30VGKM2 $^ 
+
+
+30VGKM3: $(wildcard $(INDIR)/30VGKM3*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/30VGKM3/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/30VGKM3 $^ 
+
+
+30VGKS1: $(wildcard $(INDIR)/30VGKS1*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/30VGKS1/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/30VGKS1 $^ 
+
+
+30VGKS2: $(wildcard $(INDIR)/30VGKS2*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/30VGKS2/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/30VGKS2 $^ 
+
+
+30VGKS3: $(wildcard $(INDIR)/30VGKS3*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/30VGKS3/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/30VGKS3 $^ 
+
+
+30VGWT1: $(wildcard $(INDIR)/30VGWT1*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/30VGWT1/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/30VGWT1 $^ 
+
+
+30VGWT3: $(wildcard $(INDIR)/30VGWT3*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/30VGWT3/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/30VGWT3 $^ 
+
+
+45VGKM1: $(wildcard $(INDIR)/45VGKM1*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/45VGKM1/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/45VGKM1 $^ 
+
+
+45VGKM2: $(wildcard $(INDIR)/45VGKM2*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/45VGKM2/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/45VGKM2 $^ 
+
+
+45VGKS1: $(wildcard $(INDIR)/45VGKS1*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/45VGKS1/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/45VGKS1 $^ 
+
+
+45VGKS2: $(wildcard $(INDIR)/45VGKS2*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/45VGKS2/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/45VGKS2 $^ 
+
+
+45VGKS3: $(wildcard $(INDIR)/45VGKS3*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/45VGKS3/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/45VGKS3 $^ 
+
+
+45VGWT1: $(wildcard $(INDIR)/45VGWT1*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/45VGWT1/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/45VGWT1 $^ 
+
+
+45VGWT2: $(wildcard $(INDIR)/45VGWT2*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/45VGWT2/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/45VGWT2 $^ 
+
+
+45VGWT3: $(wildcard $(INDIR)/45VGWT3*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/45VGWT3/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/45VGWT3 $^ 
+
+
+6VGKM1: $(wildcard $(INDIR)/6VGKM1*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/6VGKM1/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/6VGKM1 $^ 
+
+
+6VGKM2: $(wildcard $(INDIR)/6VGKM2*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/6VGKM2/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/6VGKM2 $^ 
+
+
+6VGKM3: $(wildcard $(INDIR)/6VGKM3*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/6VGKM3/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/6VGKM3 $^ 
+
+
+6VGKS1: $(wildcard $(INDIR)/6VGKS1*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/6VGKS1/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/6VGKS1 $^ 
+
+
+6VGKS2: $(wildcard $(INDIR)/6VGKS2*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/6VGKS2/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/6VGKS2 $^ 
+
+
+6VGWT1: $(wildcard $(INDIR)/6VGWT1*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/6VGWT1/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/6VGWT1 $^ 
+
+
+6VGWT2: $(wildcard $(INDIR)/6VGWT2*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/6VGWT2/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/6VGWT2 $^ 
+
+
+6VGWT3: $(wildcard $(INDIR)/6VGWT3*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/6VGWT3/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/6VGWT3 $^ 
+

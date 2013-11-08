@@ -1,0 +1,27 @@
+## # $@ = nom de la cible
+## # $< = nom de la 1ere dépendance
+## # $^ = toutes les dépendances
+
+include /commun/data/packages/tools.mk
+FASTQC=$(packages.dir)/FastQC/fastqc
+
+GTF=/commun/data/pubdb/ucsc/mm10
+
+INDIR=../align/merged.bam/
+OUTDIR=../align/fastQC
+
+
+PHONY=all clean
+
+all: #foreach($sample in $config) ${sample.name} #end
+
+
+#### FASTQC avant l'alignement
+#foreach($sample in $config)
+
+${sample.name}: $(INDIR)/${sample.name}.bam
+	mkdir -p $(OUTDIR)/${sample.name}/ && \
+	$(FASTQC) -o $(OUTDIR)/${sample.name} $^ 
+
+#end
+

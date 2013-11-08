@@ -1,0 +1,32 @@
+## # $@ = nom de la cible
+## # $< = nom de la 1ere dépendance
+## # $^ = toutes les dépendances
+
+include /commun/data/packages/tools.mk
+
+
+GTF=/commun/data/pubdb/ucsc/mm10
+
+INDIR=../align/merged.bam
+OUTDIR=../align/cufflinks
+
+
+PHONY=all clean
+
+
+## ####### 
+## Merge BAM avec Samtools
+all: #foreach($record in $config) ${OUTDIR}/${record.name}/transcripts.gtf #end
+
+#foreach($record in $config)
+
+${OUTDIR}/${record.name}/transcripts.gtf: ${INDIR}/${record.name}.bam
+	mkdir -p ${OUTDIR} && \
+	${CUFFLINKS.dir}/cufflinks -p 20 -o ${OUTDIR}/${record.name} ${INDIR}/${record.name}.bam
+#end
+
+
+
+
+
+

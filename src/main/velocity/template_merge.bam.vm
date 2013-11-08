@@ -1,0 +1,41 @@
+## # $@ = nom de la cible
+## # $< = nom de la 1ere dépendance
+## # $^ = toutes les dépendances
+
+include /commun/data/packages/tools.mk
+FASTQC=$(packages.dir)/FastQC/fastqc
+
+GTF=/commun/data/pubdb/ucsc/mm10
+
+INDIR=../fastqrnaseq/Project_RNAseqSCN5A/fastqcutadapt-a
+OUTDIR=../align
+
+
+PHONY=all clean
+
+
+
+## ####### 
+## Merge BAM avec Samtools
+all: #foreach($sample in $config) ${OUTDIR}/merged.bam/${sample.name}.bam #end
+
+#foreach($record in $config)
+
+${OUTDIR}/merged.bam/${record.name}.bam: $(wildcard ${OUTDIR}/tophat/${record.name}*/accepted_hits.bam) 
+	mkdir -p ${OUTDIR}/merged.bam && \
+	${SAMTOOLS} merge $@ $^
+#end
+
+
+## Ex Pierre pour ajouter RG
+## #set($groupid=0)
+## #foreach($record in $config)
+## #set($groupid = $groupid +1 )
+## 
+## commande > saveas${groupid}
+
+
+
+
+
+

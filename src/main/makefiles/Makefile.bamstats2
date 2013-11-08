@@ -1,0 +1,134 @@
+SHELL := /bin/bash 
+
+include /commun/data/packages/tools.mk
+FASTQC=$(packages.dir)/FastQC/fastqc
+
+
+GTF=/commun/data/pubdb/ucsc/mm10
+
+INDIR=../align/merged.bam
+OUTDIR=../align/bamstats2
+
+BAMSTATS=/commun/data/packages/jvarkit-git/bamstats01.jar
+
+
+PHONY=all clean
+
+all:  ${OUTDIR}/30VGKM1.tsv  ${OUTDIR}/30VGKM2.tsv  ${OUTDIR}/30VGKM3.tsv  ${OUTDIR}/30VGKS1.tsv  ${OUTDIR}/30VGKS2.tsv  ${OUTDIR}/30VGKS3.tsv  ${OUTDIR}/30VGWT1.tsv  ${OUTDIR}/30VGWT2.tsv  ${OUTDIR}/30VGWT3.tsv  ${OUTDIR}/45VGKM1.tsv  ${OUTDIR}/45VGKM2.tsv  ${OUTDIR}/45VGKM3.tsv  ${OUTDIR}/45VGKS1.tsv  ${OUTDIR}/45VGKS2.tsv  ${OUTDIR}/45VGKS3.tsv  ${OUTDIR}/45VGWT1.tsv  ${OUTDIR}/45VGWT2.tsv  ${OUTDIR}/45VGWT3.tsv  ${OUTDIR}/6VGKM1.tsv  ${OUTDIR}/6VGKM2.tsv  ${OUTDIR}/6VGKM3.tsv  ${OUTDIR}/6VGKS1.tsv  ${OUTDIR}/6VGKS2.tsv  ${OUTDIR}/6VGKS3.tsv  ${OUTDIR}/6VGWT1.tsv  ${OUTDIR}/6VGWT2.tsv  ${OUTDIR}/6VGWT3.tsv 
+${OUTDIR}/30VGKM1.tsv: ${INDIR}/30VGKM1.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/30VGKM1.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/30VGKM1.tsv
+${OUTDIR}/30VGKM2.tsv: ${INDIR}/30VGKM2.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/30VGKM2.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/30VGKM2.tsv
+${OUTDIR}/30VGKM3.tsv: ${INDIR}/30VGKM3.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/30VGKM3.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/30VGKM3.tsv
+${OUTDIR}/30VGKS1.tsv: ${INDIR}/30VGKS1.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/30VGKS1.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/30VGKS1.tsv
+${OUTDIR}/30VGKS2.tsv: ${INDIR}/30VGKS2.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/30VGKS2.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/30VGKS2.tsv
+${OUTDIR}/30VGKS3.tsv: ${INDIR}/30VGKS3.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/30VGKS3.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/30VGKS3.tsv
+${OUTDIR}/30VGWT1.tsv: ${INDIR}/30VGWT1.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/30VGWT1.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/30VGWT1.tsv
+${OUTDIR}/30VGWT2.tsv: ${INDIR}/30VGWT2.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/30VGWT2.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/30VGWT2.tsv
+${OUTDIR}/30VGWT3.tsv: ${INDIR}/30VGWT3.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/30VGWT3.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/30VGWT3.tsv
+${OUTDIR}/45VGKM1.tsv: ${INDIR}/45VGKM1.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/45VGKM1.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/45VGKM1.tsv
+${OUTDIR}/45VGKM2.tsv: ${INDIR}/45VGKM2.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/45VGKM2.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/45VGKM2.tsv
+${OUTDIR}/45VGKM3.tsv: ${INDIR}/45VGKM3.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/45VGKM3.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/45VGKM3.tsv
+${OUTDIR}/45VGKS1.tsv: ${INDIR}/45VGKS1.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/45VGKS1.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/45VGKS1.tsv
+${OUTDIR}/45VGKS2.tsv: ${INDIR}/45VGKS2.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/45VGKS2.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/45VGKS2.tsv
+${OUTDIR}/45VGKS3.tsv: ${INDIR}/45VGKS3.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/45VGKS3.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/45VGKS3.tsv
+${OUTDIR}/45VGWT1.tsv: ${INDIR}/45VGWT1.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/45VGWT1.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/45VGWT1.tsv
+${OUTDIR}/45VGWT2.tsv: ${INDIR}/45VGWT2.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/45VGWT2.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/45VGWT2.tsv
+${OUTDIR}/45VGWT3.tsv: ${INDIR}/45VGWT3.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/45VGWT3.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/45VGWT3.tsv
+${OUTDIR}/6VGKM1.tsv: ${INDIR}/6VGKM1.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/6VGKM1.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/6VGKM1.tsv
+${OUTDIR}/6VGKM2.tsv: ${INDIR}/6VGKM2.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/6VGKM2.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/6VGKM2.tsv
+${OUTDIR}/6VGKM3.tsv: ${INDIR}/6VGKM3.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/6VGKM3.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/6VGKM3.tsv
+${OUTDIR}/6VGKS1.tsv: ${INDIR}/6VGKS1.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/6VGKS1.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/6VGKS1.tsv
+${OUTDIR}/6VGKS2.tsv: ${INDIR}/6VGKS2.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/6VGKS2.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/6VGKS2.tsv
+${OUTDIR}/6VGKS3.tsv: ${INDIR}/6VGKS3.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/6VGKS3.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/6VGKS3.tsv
+${OUTDIR}/6VGWT1.tsv: ${INDIR}/6VGWT1.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/6VGWT1.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/6VGWT1.tsv
+${OUTDIR}/6VGWT2.tsv: ${INDIR}/6VGWT2.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/6VGWT2.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/6VGWT2.tsv
+${OUTDIR}/6VGWT3.tsv: ${INDIR}/6VGWT3.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/6VGWT3.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/6VGWT3.tsv
+
+
+
+
+
+
+
+
+

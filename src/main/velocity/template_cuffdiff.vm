@@ -1,0 +1,44 @@
+## # $@ = nom de la cible
+## # $< = nom de la 1ere dépendance
+## # $^ = toutes les dépendances
+
+include /commun/data/packages/tools.mk
+FASTQC=$(packages.dir)/FastQC/fastqc
+
+GTF=/commun/data/pubdb/ucsc/mm10
+
+INDIR=../fastqrnaseq/Project_RNAseqSCN5A/fastqcutadapt-a
+OUTDIR=../align
+
+CUFFDIFF=/commun/data/packages/cufflinks-2.1.1.Linux_x86_64/cuffdiff
+
+
+PHONY=all clean
+
+
+
+## ####### 
+## Merge BAM avec Samtools
+all: cuffdiff
+
+## Diff 6WT-6KS
+cuffdiff: ${OUTDIR}/merged_asm/merged.gtf
+	mkdir -p ${OUTDIR}/cuffdiff && \
+	${CUFFDIFF} -o ${OUTDIR}/cuffdiff -b ${GTF}/Sequence/Bowtie2Index/genome.fa -p 20 -L 6WT,6KS -u ${OUTDIR}/merged_asm/merged.gtf \
+	../align/merged.bam/6VGWT1.bam,../align/merged.bam/6VGWT2.bam,../align/merged.bam/6VGWT3.bam \
+	../align/merged.bam/6VGKS1.bam,../align/merged.bam/6VGKS2.bam,../align/merged.bam/6VGKS3.bam 
+
+
+
+## Ex Pierre pour ajouter RG
+## #set($groupid=0)
+## #foreach($record in $config)
+## #set($groupid = $groupid +1 )
+## 
+## commande > saveas${groupid}
+
+
+
+
+
+

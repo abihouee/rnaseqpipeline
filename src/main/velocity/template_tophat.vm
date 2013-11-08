@@ -1,0 +1,57 @@
+## # $@ = nom de la cible
+## # $< = nom de la 1ere dépendance
+## # $^ = toutes les dépendances
+
+include /commun/data/packages/tools.mk
+FASTQC=$(packages.dir)/FastQC/fastqc
+
+GTF=/commun/data/pubdb/ucsc/mm10
+
+INDIR=../fastqrnaseq/Project_RNAseqSCN5A/fastqcutadapt-a
+OUTDIR=../align
+
+
+PHONY=all clean
+
+
+
+## TOPHAT
+## all : #foreach($sample in $template) #foreach($fastq in ${sample.fastqs}) ${OUTDIR}/tophat/$(subst .fastq.gz,,${fastq})/accepted_hits.bam #end #end
+## 
+## #foreach($sample in $template)
+## #foreach($fastq in ${sample.fastqs})
+##    
+## ${OUTDIR}/tophat/$(subst .fastq.gz,,${fastq})/accepted_hits.bam : ${INDIR}/${fastq}
+## 	mkdir -p ${OUTDIR}/tophat/$(subst .fastq.gz,,${fastq}) && \
+## 	${TOPHAT.dir}/tophat2 -p 16  -G ${GTF}/Annotation/Genes/genes.gtf -o ${OUTDIR}/tophat/$(subst .fastq.gz,,${fastq}) ${GTF}/Sequence/Bowtie2Index/genome $<,$(subst R1,R2,$<)
+## #end
+## #end
+
+
+## TOPHAT
+all : #foreach($sample in $template) #foreach($fastq in ${sample.fastqs}) ${OUTDIR}/tophat/$(subst .fastq.gz,,${fastq})/accepted_hits.bam #end #end
+#set($groupid=0)
+
+#foreach($sample in $template)
+#foreach($fastq in ${sample.fastqs})
+#set($groupid = $groupid +1 )
+${OUTDIR}/tophat/$(subst .fastq.gz,,${fastq})/accepted_hits.bam : ${INDIR}/${fastq}
+	mkdir -p ${OUTDIR}/tophat/$(subst .fastq.gz,,${fastq}) && \
+	${TOPHAT.dir}/tophat2 -p 16  -G ${GTF}/Annotation/Genes/genes.gtf -o ${OUTDIR}/tophat/$(subst .fastq.gz,,${fastq}) \
+	--rg-id id${groupid} \
+	--rg-library libname \
+	--rg-sample samplename \      
+	--rg-description description \
+	--rg-platform-unit Illumina \
+	--rg-center Nantes \
+	--rg-platform Illumina \ 
+	${GTF}/Sequence/Bowtie2Index/genome $<,$(subst R1,R2,$<)
+#end
+#end
+
+
+
+
+
+
+

@@ -1,0 +1,33 @@
+## # $@ = nom de la cible
+## # $< = nom de la 1ere dépendance
+## # $^ = toutes les dépendances
+
+include /commun/data/packages/tools.mk
+FASTQC=$(packages.dir)/FastQC/fastqc
+
+GTF=/commun/data/pubdb/ucsc/mm10
+
+INDIR=../fastqrnaseq/Project_RNAseqSCN5A/fastqcutadapt-a
+OUTDIR=../align
+
+
+PHONY=all clean
+
+all: #foreach($sample in $config) ${sample.name} #end
+
+
+#### FASTQC avant l'alignement
+#foreach($record in $config)
+
+${record.name}: $(wildcard $(INDIR)/${record.name}*.fastq.gz)
+	mkdir -p $(OUTDIR)/fastQC/${record.name}/ && \
+	$(FASTQC) --casava -o $(OUTDIR)/fastQC/${record.name} $^ 
+
+#end
+
+
+
+
+
+
+

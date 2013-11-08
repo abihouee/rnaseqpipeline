@@ -1,0 +1,32 @@
+
+include /commun/data/packages/tools.mk
+FASTQC=$(packages.dir)/FastQC/fastqc
+
+GTF=/commun/data/pubdb/ucsc/mm10
+
+INDIR=../fastqrnaseq/Project_RNAseqSCN5A/fastqcutadapt-a
+OUTDIR=../align
+
+CUFFDIFF=/commun/data/packages/cufflinks-2.1.1.Linux_x86_64/cuffdiff
+
+
+PHONY=all clean
+
+
+
+all: cuffdiff
+
+cuffdiff: ${OUTDIR}/merged_asm/merged.gtf
+	mkdir -p ${OUTDIR}/cuffdiff && \
+	${CUFFDIFF} -o ${OUTDIR}/cuffdiff -b ${GTF}/Sequence/Bowtie2Index/genome.fa -p 20 -L 6WT,6KS -u ${OUTDIR}/merged_asm/merged.gtf \
+	../align/merged.bam/45VGWT1.bam,../align/merged.bam/45VGWT2.bam,../align/merged.bam/45VGWT3.bam \
+	../align/merged.bam/45VGKS1.bam,../align/merged.bam/45VGKS2.bam,../align/merged.bam/45VGKS3.bam 
+
+
+
+
+
+
+
+
+

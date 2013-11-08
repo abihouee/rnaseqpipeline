@@ -1,0 +1,42 @@
+## # $@ = nom de la cible
+## # $< = nom de la 1ere dépendance
+## # $^ = toutes les dépendances
+SHELL := /bin/bash 
+
+include /commun/data/packages/tools.mk
+FASTQC=$(packages.dir)/FastQC/fastqc
+
+
+GTF=/commun/data/pubdb/ucsc/mm10
+
+INDIR=../align/merged.bam
+OUTDIR=../align/bamstats2
+
+BAMSTATS=/commun/data/packages/jvarkit-git/bamstats01.jar
+
+
+PHONY=all clean
+
+all: #foreach($record in $config) ${OUTDIR}/${record.name}.tsv #end
+
+#foreach($record in $config) 
+${OUTDIR}/${record.name}.tsv: ${INDIR}/${record.name}.bam
+	mkdir -p ${OUTDIR} && \
+	java -jar ${BAMSTATS} I=${INDIR}/${record.name}.bam \
+	BED=<(awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$3)-1,$$4);}' ${GTF}/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort |uniq ) > ${OUTDIR}/${record.name}.tsv
+#end
+
+## java -jar /commun/data/packages/jvarkit-git/bamstats01.jar I=../align/merged.bam/45VGWT1.bam BED=<(awk -F '  ' '{printf("%s\t%d\t%s\n",$1,int($3)-1,$4);}' /commun/data/pubdb/ucsc/mm10/Annotation/Genes/genes.gtf | grep -v random | grep -v Un | LC_ALL=C sort | uniq) > ../align/bamstats2/45VGWT1.tsv
+
+
+## #foreach($record in $config) 
+## ${OUTDIR}/${record.name}.tsv: ${INDIR}/${record.name}.bam
+## 	mkdir -p ${OUTDIR} && \
+## 	java -jar ${BAMSTATS} I=${INDIR}/${record.name}.bam > ${OUTDIR}/${record.name}.tsv
+## #end
+
+
+
+
+
+

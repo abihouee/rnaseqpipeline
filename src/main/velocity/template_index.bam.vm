@@ -1,0 +1,36 @@
+## Cible : dépendances
+##	comment faire les dépendances
+
+## # $@ = nom de la cible
+## # $< = nom de la 1ere dépendance
+## # $^ = toutes les dépendances
+
+include /commun/data/packages/tools.mk
+FASTQC=$(packages.dir)/FastQC/fastqc
+
+GTF=/commun/data/pubdb/ucsc/mm10
+
+INDIR=../align/merged.bam
+
+
+PHONY=all clean
+
+
+
+## ####### 
+## Index BAM avec Samtools
+
+all: #foreach($sample in $config) ${INDIR}/${sample.name}.bai #end
+
+
+## Remarque : Samtools génère des .bam.bai et non pas des .bai. Si on utilise la règle ci-dessous, elle sera effectuée à chaque fois, même s'il existe un .bam.bai
+## ${INDIR}/%.bai: ${INDIR}/%.bam 
+## 	${SAMTOOLS} index $<
+
+
+#foreach($record in $config)
+
+${INDIR}/${record.name}.bai:  ${INDIR}/${record.name}.bam
+	${SAMTOOLS} index $< && mv ${INDIR}/${record.name}.bam.bai ${INDIR}/${record.name}.bai
+#end
+

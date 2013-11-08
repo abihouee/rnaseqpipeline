@@ -1,0 +1,135 @@
+
+include /commun/data/packages/tools.mk
+FASTQC=$(packages.dir)/FastQC/fastqc
+
+GTF=/commun/data/pubdb/ucsc/mm10
+
+INDIR=../align/merged.bam/
+OUTDIR=../align/fastQC
+
+
+PHONY=all clean
+
+all:  30VGKM1  30VGKM2  30VGKM3  30VGKS1  30VGKS2  30VGKS3  30VGWT1  30VGWT3  45VGKM1  45VGKM2  45VGKS1  45VGKS2  45VGKS3  45VGWT1  45VGWT2  45VGWT3  6VGKM1  6VGKM2  6VGKM3  6VGKS1  6VGKS2  6VGWT1  6VGWT2  6VGWT3 
+
+
+30VGKM1: $(INDIR)/30VGKM1.bam
+	mkdir -p $(OUTDIR)/30VGKM1/ && \
+	$(FASTQC) -o $(OUTDIR)/30VGKM1 $^ 
+
+
+30VGKM2: $(INDIR)/30VGKM2.bam
+	mkdir -p $(OUTDIR)/30VGKM2/ && \
+	$(FASTQC) -o $(OUTDIR)/30VGKM2 $^ 
+
+
+30VGKM3: $(INDIR)/30VGKM3.bam
+	mkdir -p $(OUTDIR)/30VGKM3/ && \
+	$(FASTQC) -o $(OUTDIR)/30VGKM3 $^ 
+
+
+30VGKS1: $(INDIR)/30VGKS1.bam
+	mkdir -p $(OUTDIR)/30VGKS1/ && \
+	$(FASTQC) -o $(OUTDIR)/30VGKS1 $^ 
+
+
+30VGKS2: $(INDIR)/30VGKS2.bam
+	mkdir -p $(OUTDIR)/30VGKS2/ && \
+	$(FASTQC) -o $(OUTDIR)/30VGKS2 $^ 
+
+
+30VGKS3: $(INDIR)/30VGKS3.bam
+	mkdir -p $(OUTDIR)/30VGKS3/ && \
+	$(FASTQC) -o $(OUTDIR)/30VGKS3 $^ 
+
+
+30VGWT1: $(INDIR)/30VGWT1.bam
+	mkdir -p $(OUTDIR)/30VGWT1/ && \
+	$(FASTQC) -o $(OUTDIR)/30VGWT1 $^ 
+
+
+30VGWT3: $(INDIR)/30VGWT3.bam
+	mkdir -p $(OUTDIR)/30VGWT3/ && \
+	$(FASTQC) -o $(OUTDIR)/30VGWT3 $^ 
+
+
+45VGKM1: $(INDIR)/45VGKM1.bam
+	mkdir -p $(OUTDIR)/45VGKM1/ && \
+	$(FASTQC) -o $(OUTDIR)/45VGKM1 $^ 
+
+
+45VGKM2: $(INDIR)/45VGKM2.bam
+	mkdir -p $(OUTDIR)/45VGKM2/ && \
+	$(FASTQC) -o $(OUTDIR)/45VGKM2 $^ 
+
+
+45VGKS1: $(INDIR)/45VGKS1.bam
+	mkdir -p $(OUTDIR)/45VGKS1/ && \
+	$(FASTQC) -o $(OUTDIR)/45VGKS1 $^ 
+
+
+45VGKS2: $(INDIR)/45VGKS2.bam
+	mkdir -p $(OUTDIR)/45VGKS2/ && \
+	$(FASTQC) -o $(OUTDIR)/45VGKS2 $^ 
+
+
+45VGKS3: $(INDIR)/45VGKS3.bam
+	mkdir -p $(OUTDIR)/45VGKS3/ && \
+	$(FASTQC) -o $(OUTDIR)/45VGKS3 $^ 
+
+
+45VGWT1: $(INDIR)/45VGWT1.bam
+	mkdir -p $(OUTDIR)/45VGWT1/ && \
+	$(FASTQC) -o $(OUTDIR)/45VGWT1 $^ 
+
+
+45VGWT2: $(INDIR)/45VGWT2.bam
+	mkdir -p $(OUTDIR)/45VGWT2/ && \
+	$(FASTQC) -o $(OUTDIR)/45VGWT2 $^ 
+
+
+45VGWT3: $(INDIR)/45VGWT3.bam
+	mkdir -p $(OUTDIR)/45VGWT3/ && \
+	$(FASTQC) -o $(OUTDIR)/45VGWT3 $^ 
+
+
+6VGKM1: $(INDIR)/6VGKM1.bam
+	mkdir -p $(OUTDIR)/6VGKM1/ && \
+	$(FASTQC) -o $(OUTDIR)/6VGKM1 $^ 
+
+
+6VGKM2: $(INDIR)/6VGKM2.bam
+	mkdir -p $(OUTDIR)/6VGKM2/ && \
+	$(FASTQC) -o $(OUTDIR)/6VGKM2 $^ 
+
+
+6VGKM3: $(INDIR)/6VGKM3.bam
+	mkdir -p $(OUTDIR)/6VGKM3/ && \
+	$(FASTQC) -o $(OUTDIR)/6VGKM3 $^ 
+
+
+6VGKS1: $(INDIR)/6VGKS1.bam
+	mkdir -p $(OUTDIR)/6VGKS1/ && \
+	$(FASTQC) -o $(OUTDIR)/6VGKS1 $^ 
+
+
+6VGKS2: $(INDIR)/6VGKS2.bam
+	mkdir -p $(OUTDIR)/6VGKS2/ && \
+	$(FASTQC) -o $(OUTDIR)/6VGKS2 $^ 
+
+
+6VGWT1: $(INDIR)/6VGWT1.bam
+	mkdir -p $(OUTDIR)/6VGWT1/ && \
+	$(FASTQC) -o $(OUTDIR)/6VGWT1 $^ 
+
+
+6VGWT2: $(INDIR)/6VGWT2.bam
+	mkdir -p $(OUTDIR)/6VGWT2/ && \
+	$(FASTQC) -o $(OUTDIR)/6VGWT2 $^ 
+
+
+6VGWT3: $(INDIR)/6VGWT3.bam
+	mkdir -p $(OUTDIR)/6VGWT3/ && \
+	$(FASTQC) -o $(OUTDIR)/6VGWT3 $^ 
+
+
