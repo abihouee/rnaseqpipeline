@@ -1,0 +1,9 @@
+
+{
+"mm10":
+  {
+  "name":"mm10",
+  "description":"Mus Musculus v10.0",
+  "fasta":"/commun/data/pubdb/ucsc/mm10.fa"
+   }
+}
