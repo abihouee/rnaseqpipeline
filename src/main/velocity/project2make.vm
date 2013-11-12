@@ -1,23 +1,48 @@
 #parse("cutadapt.mod.vm")
+#parse("fastqc.mod.vm")
 
-.PHONY=all clean all_cutadpat
+.PHONY=all clean all_cutadpat all_fastqc0
 SHELL=/bin/bash
-OUT=align
+OUT:=align
 
-all: all_cutadpat
+all: all_fastqc0
+
+
+all_fastqc0: #foreach($dir in $project)#foreach($sample in ${dir.samples}) \
+	${OUT}/Samples/${sample.sample}/FASTQC0/${sample.sample}_fastqc/fastqc_report.html #end#end
 
 
 all_cutadpat: #foreach($dir in $project)#foreach($sample in ${dir.samples})#foreach($pair in ${sample.files}) \
-	#cutadapt2file(${pair.forward}) #cutadapt2file(${pair.reverse}) #end #end #end
+	#cutadapt2file(${pair.forward}) \
+	#cutadapt2file(${pair.reverse}) #end#end#end
+
 
 
 #foreach($dir in $project)
 #foreach($sample in ${dir.samples})
+
+#
+# Run FASTQC for Sample '${sample.sample}' after cutadapt
+#	
+${OUT}/Samples/${sample.sample}/FASTQC0/${sample.sample}_fastqc/fastqc_report.html : #foreach($pair in ${sample.files}) \
+		#cutadapt2file(${pair.forward}) \
+		#cutadapt2file(${pair.reverse}) #end
+
+	mkdir -p ${OUT}/Samples/${sample.sample}/FASTQC0 && \
+	gunzip -c $^ | gzip > ${OUT}/Samples/${sample.sample}/FASTQC0/${sample.sample}.fastq.gz && \
+	${fastqc_exe}  \
+		-o ${OUT}/Samples/${sample.sample}/FASTQC0 \
+		${OUT}/Samples/${sample.sample}/FASTQC0/${sample.sample}.fastq.gz && \
+	rm -f	${OUT}/Samples/${sample.sample}/FASTQC0/${sample.sample}_fastqc.zip \
+		${OUT}/Samples/${sample.sample}/FASTQC0/${sample.sample}.fastq.gz
+
+
 #foreach($pair in ${sample.files})
 #set($fastqs=[ ${pair.forward} , ${pair.reverse}] )
+
+	
+
 #foreach($fastq in $fastqs)
-
-
 
 #
 # Run Cutadapt for ${fastq.path}
@@ -27,8 +52,7 @@ all_cutadpat: #foreach($dir in $project)#foreach($sample in ${dir.samples})#fore
 	${cutadapt_exe} -a #if(
 		${fastq.side}==1)AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC#elseif(
 		${fastq.side}==2)AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT#end  2> $(addsuffix .report.txt,$(basename $@)) $< |\
-	awk '{if(NR%4==2 && length($$0)==0) { printf("NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN\n");} else if(NR%4==0 && length($$0)==0) { printf("#[[############
-######################################]]#\n");} else {print;}}' |\
+	head -n 40000 |\
 	gzip --best -c > $@
 
 	
