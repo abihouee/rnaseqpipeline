@@ -1,0 +1,43 @@
+#parse("cutadapt.mod.vm")
+
+.PHONY=all clean all_cutadpat
+SHELL=/bin/bash
+OUT=align
+
+all: all_cutadpat
+
+
+all_cutadpat: #foreach($dir in $project)#foreach($sample in ${dir.samples})#foreach($pair in ${sample.files}) \
+	#cutadapt2file(${pair.forward}) #cutadapt2file(${pair.reverse}) #end #end #end
+
+
+#foreach($dir in $project)
+#foreach($sample in ${dir.samples})
+#foreach($pair in ${sample.files})
+#set($fastqs=[ ${pair.forward} , ${pair.reverse}] )
+#foreach($fastq in $fastqs)
+
+
+
+#
+# Run Cutadapt for ${fastq.path}
+#	
+#cutadapt2file(${fastq}): ${fastq.path}
+	mkdir -p $(dir $@) && \
+	${cutadapt_exe} -a #if(
+		${fastq.side}==1)AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC#elseif(
+		${fastq.side}==2)AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT#end  $< -o $(basename $@) > $(addsuffix .report.txt,$(basename $@)) && \
+	awk '{if(NR%4==2 && length($$0)==0) { printf("NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN\n");} else if(NR%4==0 && length($$0)==0) { printf("#[[############
+######################################]]#\n");} else {print;}}'  $(basename $@) > $(addsuffix .tmp,$(basename $@)) && \
+	mv $(addsuffix .tmp,$(basename $@)) $(basename $@) && \
+	gzip --best --force $(basename $@)
+
+	
+
+#end
+#end
+#end
+#end
+
+clean:
+	
