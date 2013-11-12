@@ -4,6 +4,9 @@
   {
   "name":"mm10",
   "description":"Mus Musculus v10.0",
-  "fasta":"/commun/data/pubdb/ucsc/mm10.fa"
+  "fasta":"/commun/data/pubdb/ucsc/mm10/Sequence/Bowtie2Index/genome.fa",
+   "gtf":"/commun/data/pubdb/ucsc/mm10/Annotation/Archives/archive-2013-03-06-15-06-02/Genes/genes.gtf"
    }
 }
+
+

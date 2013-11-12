@@ -1,11 +1,19 @@
+#set($reference = $references["${config.reference}"])
 #parse("cutadapt.mod.vm")
 #parse("fastqc.mod.vm")
+#parse("tophat.mod.vm")
+#parse("bowtie.mod.vm")
+#parse("picard.mod.vm")
+#parse("samtools.mod.vm")
 
-.PHONY=all clean all_cutadpat all_fastqc0
+.PHONY=all clean all_cutadpat all_fastqc0 all_merged
 SHELL=/bin/bash
-OUT:=align
+OUT:= ${config.outdir}
 
-all: all_fastqc0
+export PATH:=$(PATH):${bowtie_dir}:${samtools_dir}
+
+
+all: all_fastqc0 all_merged
 
 
 all_fastqc0: #foreach($dir in $project)#foreach($sample in ${dir.samples}) \
@@ -16,6 +24,9 @@ all_cutadpat: #foreach($dir in $project)#foreach($sample in ${dir.samples})#fore
 	#cutadapt2file(${pair.forward}) \
 	#cutadapt2file(${pair.reverse}) #end#end#end
 
+
+all_merged : #foreach($dir in $project)#foreach($sample in ${dir.samples}) \
+		${OUT}/Samples/${sample.sample}/MERGED/accepted_hits.bam #end#end
 
 
 #foreach($dir in $project)
@@ -37,10 +48,47 @@ ${OUT}/Samples/${sample.sample}/FASTQC0/${sample.sample}_fastqc/fastqc_report.ht
 		${OUT}/Samples/${sample.sample}/FASTQC0/${sample.sample}.fastq.gz
 
 
+#
+# merge tophat accepted_hits for '${sample.sample}'
+#
+${OUT}/Samples/${sample.sample}/MERGED/accepted_hits.bam : #foreach($pair in ${sample.files}) \
+	 ${OUT}/Samples/${sample.sample}/TOPHAT/${pair.md5pair}/accepted_hits.bam
+	 #end
+
+	mkdir -p $(dir $@) && \
+	java -jar ${$picard_dir}/MergeSamFiles.jar O=$@ $(foreach B,$^, I=${B}) \
+		SO=coordinate AS=false USE_THREADING=true COMMENT="Merge from $^" \
+		TMP_DOR=$(dir $@) \
+		VALIDATION_STRINGENCY=LENIENT \
+		MAX_RECORDS_IN_RAM=2000000 \
+		CREATE_INDEX=true \
+		
+
+
 #foreach($pair in ${sample.files})
 #set($fastqs=[ ${pair.forward} , ${pair.reverse}] )
 
+#
+# Run Tophat for pair '${pair.id}'
+# 
+${OUT}/Samples/${sample.sample}/TOPHAT/${pair.md5pair}/accepted_hits.bam :  ${reference.fasta} #cutadapt2file(${pair.forward})  #cutadapt2file(${pair.reverse})
+
+	mkdir -p $(dir $@) && \
+	${tophat_exe} -p 16 \
+	 -G ${reference.gtf} \
+	-o $(dir $@) \
+	--rg-id "${pair.id}" \
+	--rg-library ${sample.sample} \
+	--rg-sample ${sample.sample} \
+	--rg-description "${sample.sample} pair ${pair.md5pair}" \
+	--rg-platform-unit ${pair.lane} \
+	--rg-center Nantes \
+	--rg-platform Illumina \
+	$(basename ${reference.fasta}) \
+	#cutadapt2file(${pair.forward}) \
+	#cutadapt2file(${pair.reverse})
 	
+        
 
 #foreach($fastq in $fastqs)
 
