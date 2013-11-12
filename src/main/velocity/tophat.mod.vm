@@ -1,4 +1,0 @@
-#parse("common.mod.vm")
-#set( $tophat_version = "2.0.6")
-#set( $tophat_dir = $packages_dir + "/tophat-" + $tophat_version + ".Linux_x86_64")
-#set( $tophat_exe = $tophat_dir + "/tophat2")
