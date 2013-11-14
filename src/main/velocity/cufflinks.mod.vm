@@ -3,3 +3,4 @@
 #set( $cufflinks_dir = $packages_dir + "/cufflinks-" + $cufflinks_version + ".Linux_x86_64")
 #set( $cufflinks_exe = $cufflinks_dir + "/cufflinks")
 #set( $cuffmerge_exe = $cufflinks_dir + "/cuffmerge")
+#set( $cuffdiff_exe = $cufflinks_dir + "/cuffdiff")

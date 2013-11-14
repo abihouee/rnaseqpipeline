@@ -13,16 +13,17 @@
 #if(${$config.tophat.numthreads})#set( $tophat_num_threads = "${config.tophat.numthreads}" )#else#set( $tophat_num_threads = 10 )#end
 #if(${$config.cufflinks.numthreads})#set( $cufflinks_num_threads = "${config.cufflinks.numthreads}" )#else#set( $cufflinks_num_threads = $tophat_num_threads )#end
 #if(${$config.cuffmerge.numthreads})#set( $cuffmerge_num_threads = "${config.cuffmerge.numthreads}" )#else#set( $cuffmerge_num_threads = $cufflinks_num_threads )#end
+#if(${$config.cuffdiff.numthreads})#set( $cuffdiff_num_threads = "${config.cuffdiff.numthreads}" )#else#set( $cuffdiff_num_threads = $cuffdiff_num_threads )#end
 
 
-.PHONY=all clean all_cutadpat all_fastqc0 all_tophat all_cufflinks
+.PHONY=all clean all_cutadpat all_fastqc0 all_tophat all_cufflinks all_cuffdiff
 SHELL=/bin/bash
 OUT:= ${config.outdir}
 
 export PATH:=$(PATH):${bowtie_dir}:${samtools_dir}
 
 
-all: ${OUT}/CUFFMERGE/MERGED/merged.gtf all_fastqc0
+all: all_cuffdiff all_fastqc0
 
 
 all_fastqc0: #foreach($dir in $project)#foreach($sample in ${dir.samples}) \
@@ -42,7 +43,40 @@ all_cufflinks : #foreach($dir in $project)#foreach($sample in ${dir.samples}) \
 		${OUT}/Samples/${sample.sample}/CUFFLINKS/transcripts.gtf #end#end
 
 
+all_cuffdiff: #foreach($replicate1 in ${config.replicates.keySet()})
+#foreach($replicate2 in ${config.replicates.keySet()})
+#if( ${replicate1.compareTo("$replicate2")} < 0 ) \
+	${OUTDIR}/CUFFDIFF/${replicate1}_vs_${replicate2}/TODO #end#end#end
+
+
+
 #foreach($dir in $project)
+
+
+#foreach($replicate1 in ${config.replicates.keySet()})
+#foreach($replicate2 in ${config.replicates.keySet()})
+#if( ${replicate1.compareTo("$replicate2")} < 0 )
+#set($diffL1= $config.replicates["$replicate1"].samples )
+#set($diffL2= $config.replicates["$replicate2"].samples )
+
+${OUTDIR}/CUFFDIFF/${replicate1}_vs_${replicate2}/TODO: ${OUT}/CUFFMERGE/MERGED/merged.gtf  #foreach($S1 in $diffL1) \
+	${OUT}/Samples/${S1}/TOPHAT/accepted_hits.bam#end#foreach($S2 in $diffL2) \
+	${OUT}/Samples/${S2}/TOPHAT/accepted_hits.bam#end
+
+	mkdir -p $(dir $@) && \
+	${cuffdiff_exe} \
+	-o $(dir $@) \
+	-b ${reference.fasta} \
+	-p ${cuffdiff_num_threads} \
+	-L ${replicate1}_vs_${replicate2} \
+	-u \
+	$(filter %.gtf,$^) \
+	#foreach($S1 in $diffL1)#if( $velocityCount >1),#end${OUT}/Samples/${S1}/TOPHAT/accepted_hits.bam#end \
+	#foreach($S2 in $diffL2)#if( $velocityCount >1),#end${OUT}/Samples/${S2}/TOPHAT/accepted_hits.bam#end
+
+#end
+#end
+#end
 
 ${OUT}/CUFFMERGE/MERGED/merged.gtf : ${OUT}/CUFFMERGE/assemblies.txt
 	mkdir -p $(dir $@) && \
