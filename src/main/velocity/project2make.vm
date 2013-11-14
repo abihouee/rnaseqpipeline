@@ -55,8 +55,7 @@ ${OUT}/CUFFMERGE/MERGED/merged.gtf : ${OUT}/CUFFMERGE/assemblies.txt
 	
 
 ${OUT}/CUFFMERGE/assemblies.txt:  #foreach($sample in ${dir.samples}) \
-		${OUT}/Samples/${sample.sample}/CUFFLINKS/transcripts.gtf
-		#end
+		${OUT}/Samples/${sample.sample}/CUFFLINKS/transcripts.gtf #end
 	
 	mkdir -p $(dir $@) && \
 	rm -f $@ #foreach($sample in ${dir.samples}) && \
