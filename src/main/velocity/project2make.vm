@@ -5,15 +5,18 @@
 #parse("bowtie.mod.vm")
 #parse("picard.mod.vm")
 #parse("samtools.mod.vm")
+#set($sample_id=0)
+#if(${$config.tophat.numthreads})#set( $tophat_num_threads = "${config.tophat.numthreads}" )#else#set( $tophat_num_threads = 10 )#end
 
-.PHONY=all clean all_cutadpat all_fastqc0 all_merged
+
+.PHONY=all clean all_cutadpat all_fastqc0 all_tophat
 SHELL=/bin/bash
 OUT:= ${config.outdir}
 
 export PATH:=$(PATH):${bowtie_dir}:${samtools_dir}
 
 
-all: all_fastqc0 all_merged
+all: all_fastqc0 all_tophat
 
 
 all_fastqc0: #foreach($dir in $project)#foreach($sample in ${dir.samples}) \
@@ -25,8 +28,8 @@ all_cutadpat: #foreach($dir in $project)#foreach($sample in ${dir.samples})#fore
 	#cutadapt2file(${pair.reverse}) #end#end#end
 
 
-all_merged : #foreach($dir in $project)#foreach($sample in ${dir.samples}) \
-		${OUT}/Samples/${sample.sample}/MERGED/accepted_hits.bam #end#end
+all_tophat : #foreach($dir in $project)#foreach($sample in ${dir.samples}) \
+		${OUT}/Samples/${sample.sample}/TOPHAT/accepted_hits.bam #end#end
 
 
 #foreach($dir in $project)
@@ -48,45 +51,35 @@ ${OUT}/Samples/${sample.sample}/FASTQC0/${sample.sample}_fastqc/fastqc_report.ht
 		${OUT}/Samples/${sample.sample}/FASTQC0/${sample.sample}.fastq.gz
 
 
+#set($sample_id = $sample_id + 1)
+
 #
-# merge tophat accepted_hits for '${sample.sample}'
-#
-${OUT}/Samples/${sample.sample}/MERGED/accepted_hits.bam : #foreach($pair in ${sample.files}) \
-	 ${OUT}/Samples/${sample.sample}/TOPHAT/${pair.md5pair}/accepted_hits.bam
-	 #end
+# Run Tophat for pair '${sample.sample}'
+# 
+${OUT}/Samples/${sample.sample}/TOPHAT/accepted_hits.bam : \
+	${reference.fasta}  #foreach($pair in ${sample.files}) \
+	#cutadapt2file(${pair.forward}) \
+	#cutadapt2file(${pair.reverse}) #end
 
 	mkdir -p $(dir $@) && \
-	java -jar ${$picard_dir}/MergeSamFiles.jar O=$@ $(foreach B,$^, I=${B}) \
-		SO=coordinate AS=false USE_THREADING=true COMMENT="Merge from $^" \
-		TMP_DOR=$(dir $@) \
-		VALIDATION_STRINGENCY=LENIENT \
-		MAX_RECORDS_IN_RAM=2000000 \
-		CREATE_INDEX=true \
-		
+	${tophat_exe} \
+	-p ${tophat_num_threads} \
+	-G ${reference.gtf} \
+	-o $(dir $@) \
+	--rg-id "g${sample_id}" \
+	--rg-library ${sample.sample} \
+	--rg-sample ${sample.sample} \
+	--rg-description "${sample.sample}  $(words $filter(%.fastq.gz,$^)) fastqs" \
+	--rg-platform-unit "$(sort #foreach($pair in ${sample.files}) ${pair.lane} #end )" \
+	--rg-center Nantes \
+	--rg-platform Illumina \
+	$(basename ${reference.fasta}) \
+	#foreach($pair in ${sample.files})#if( $velocityCount >1),#end#cutadapt2file(${pair.forward})#end \
+	#foreach($pair in ${sample.files})#if( $velocityCount >1),#end#cutadapt2file(${pair.reverse})#end
 
 
 #foreach($pair in ${sample.files})
 #set($fastqs=[ ${pair.forward} , ${pair.reverse}] )
-
-#
-# Run Tophat for pair '${pair.id}'
-# 
-${OUT}/Samples/${sample.sample}/TOPHAT/${pair.md5pair}/accepted_hits.bam :  ${reference.fasta} #cutadapt2file(${pair.forward})  #cutadapt2file(${pair.reverse})
-
-	mkdir -p $(dir $@) && \
-	${tophat_exe} -p 16 \
-	 -G ${reference.gtf} \
-	-o $(dir $@) \
-	--rg-id "${pair.id}" \
-	--rg-library ${sample.sample} \
-	--rg-sample ${sample.sample} \
-	--rg-description "${sample.sample} pair ${pair.md5pair}" \
-	--rg-platform-unit ${pair.lane} \
-	--rg-center Nantes \
-	--rg-platform Illumina \
-	$(basename ${reference.fasta}) \
-	#cutadapt2file(${pair.forward}) \
-	#cutadapt2file(${pair.reverse})
 	
         
 
