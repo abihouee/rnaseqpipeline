@@ -1,4 +1,4 @@
 #parse("common.mod.vm")
-#set( $bowtie_version = "2.0.2")
+#set( $bowtie_version = "2.1.0")
 #set( $bowtie_dir = $packages_dir + "/bowtie2-" + $bowtie_version)
 #set( $bowtie_exe = $bowtie_dir + "/bowtie2")

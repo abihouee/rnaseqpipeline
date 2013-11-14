@@ -1,3 +1,6 @@
+#
+# Date: ${now}
+#
 #set($reference = $references["${config.reference}"])
 #parse("cutadapt.mod.vm")
 #parse("fastqc.mod.vm")
@@ -5,18 +8,21 @@
 #parse("bowtie.mod.vm")
 #parse("picard.mod.vm")
 #parse("samtools.mod.vm")
+#parse("cufflinks.mod.vm")
 #set($sample_id=0)
 #if(${$config.tophat.numthreads})#set( $tophat_num_threads = "${config.tophat.numthreads}" )#else#set( $tophat_num_threads = 10 )#end
+#if(${$config.cufflinks.numthreads})#set( $cufflinks_num_threads = "${config.cufflinks.numthreads}" )#else#set( $cufflinks_num_threads = $tophat_num_threads )#end
+#if(${$config.cuffmerge.numthreads})#set( $cuffmerge_num_threads = "${config.cuffmerge.numthreads}" )#else#set( $cuffmerge_num_threads = $cufflinks_num_threads )#end
 
 
-.PHONY=all clean all_cutadpat all_fastqc0 all_tophat
+.PHONY=all clean all_cutadpat all_fastqc0 all_tophat all_cufflinks
 SHELL=/bin/bash
 OUT:= ${config.outdir}
 
 export PATH:=$(PATH):${bowtie_dir}:${samtools_dir}
 
 
-all: all_fastqc0 all_tophat
+all: ${OUT}/CUFFMERGE/MERGED/merged.gtf all_fastqc0
 
 
 all_fastqc0: #foreach($dir in $project)#foreach($sample in ${dir.samples}) \
@@ -32,8 +38,35 @@ all_tophat : #foreach($dir in $project)#foreach($sample in ${dir.samples}) \
 		${OUT}/Samples/${sample.sample}/TOPHAT/accepted_hits.bam #end#end
 
 
+all_cufflinks : #foreach($dir in $project)#foreach($sample in ${dir.samples}) \
+		${OUT}/Samples/${sample.sample}/CUFFLINKS/transcripts.gtf #end#end
+
+
 #foreach($dir in $project)
+
+${OUT}/CUFFMERGE/MERGED/merged.gtf : ${OUT}/CUFFMERGE/assemblies.txt
+	mkdir -p $(dir $@) && \
+	${cuffmerge_exe} \
+		-o $(dir $@) \
+		-p ${cuffmerge_num_threads} \
+		-G ${reference.gtf} \
+		-s ${reference.fasta} \
+		$<
+	
+
+${OUT}/CUFFMERGE/assemblies.txt:  #foreach($sample in ${dir.samples}) \
+		${OUT}/Samples/${sample.sample}/CUFFLINKS/transcripts.gtf
+		#end
+	
+	mkdir -p $(dir $@) && \
+	rm -f $@ #foreach($sample in ${dir.samples}) && \
+	echo "${OUT}/Samples/${sample.sample}/CUFFLINKS/transcripts.gtf" >> $@ #end
+
+
 #foreach($sample in ${dir.samples})
+
+
+
 
 #
 # Run FASTQC for Sample '${sample.sample}' after cutadapt
@@ -53,29 +86,46 @@ ${OUT}/Samples/${sample.sample}/FASTQC0/${sample.sample}_fastqc/fastqc_report.ht
 
 #set($sample_id = $sample_id + 1)
 
+
 #
-# Run Tophat for pair '${sample.sample}'
+# Run Cufflinks for Sample '${sample.sample}'
+# 
+${OUT}/Samples/${sample.sample}/CUFFLINKS/transcripts.gtf : \
+	${reference.gtf} \
+	${OUT}/Samples/${sample.sample}/TOPHAT/accepted_hits.bam
+	mkdir -p $(dir $@) && \
+	${cufflinks_exe} \
+		-p ${cufflinks_num_threads} \
+		-o $(dir $@) \
+		-q --no-update-check -u \
+		-G ${reference.gtf} \
+		 $(filter %.bam,$^)
+	
+
+#
+# Run Tophat for Sample '${sample.sample}'
 # 
 ${OUT}/Samples/${sample.sample}/TOPHAT/accepted_hits.bam : \
-	${reference.fasta}  #foreach($pair in ${sample.files}) \
+	${reference.fasta} \
+	${reference.gtf} #foreach($pair in ${sample.files}) \
 	#cutadapt2file(${pair.forward}) \
 	#cutadapt2file(${pair.reverse}) #end
 
 	mkdir -p $(dir $@) && \
 	${tophat_exe} \
-	-p ${tophat_num_threads} \
-	-G ${reference.gtf} \
-	-o $(dir $@) \
-	--rg-id "g${sample_id}" \
-	--rg-library ${sample.sample} \
-	--rg-sample ${sample.sample} \
-	--rg-description "${sample.sample}  $(words $filter(%.fastq.gz,$^)) fastqs" \
-	--rg-platform-unit "$(sort #foreach($pair in ${sample.files}) ${pair.lane} #end )" \
-	--rg-center Nantes \
-	--rg-platform Illumina \
-	$(basename ${reference.fasta}) \
-	#foreach($pair in ${sample.files})#if( $velocityCount >1),#end#cutadapt2file(${pair.forward})#end \
-	#foreach($pair in ${sample.files})#if( $velocityCount >1),#end#cutadapt2file(${pair.reverse})#end
+		-p ${tophat_num_threads} \
+		-G ${reference.gtf} \
+		-o $(dir $@) \
+		--rg-id "g${sample_id}" \
+		--rg-library ${sample.sample} \
+		--rg-sample ${sample.sample} \
+		--rg-description "${sample.sample}  $(words $filter(%.fastq.gz,$^)) fastqs" \
+		--rg-platform-unit "$(sort #foreach($pair in ${sample.files}) ${pair.lane} #end )" \
+		--rg-center Nantes \
+		--rg-platform Illumina \
+		$(basename ${reference.fasta}) \
+		#foreach($pair in ${sample.files})#if( $velocityCount >1),#end#cutadapt2file(${pair.forward})#end \
+		#foreach($pair in ${sample.files})#if( $velocityCount >1),#end#cutadapt2file(${pair.reverse})#end
 
 
 #foreach($pair in ${sample.files})
@@ -93,7 +143,6 @@ ${OUT}/Samples/${sample.sample}/TOPHAT/accepted_hits.bam : \
 	${cutadapt_exe} -a #if(
 		${fastq.side}==1)AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC#elseif(
 		${fastq.side}==2)AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT#end  2> $(addsuffix .report.txt,$(basename $@)) $< |\
-	head -n 40000 |\
 	gzip --best -c > $@
 
 	

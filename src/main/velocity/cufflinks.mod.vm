@@ -1,0 +1,5 @@
+#parse("common.mod.vm")
+#set( $cufflinks_version = "2.1.1")
+#set( $cufflinks_dir = $packages_dir + "/cufflinks-" + $cufflinks_version + ".Linux_x86_64")
+#set( $cufflinks_exe = $cufflinks_dir + "/cufflinks")
+#set( $cuffmerge_exe = $cufflinks_dir + "/cuffmerge")
