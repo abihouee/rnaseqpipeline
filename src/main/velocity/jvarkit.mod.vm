@@ -1,0 +1,4 @@
+#parse("common.mod.vm")
+#set( $jvarkit_version = "latest")
+#set( $jvarkit_dir = $packages_dir + "jvarkit-git/")
+

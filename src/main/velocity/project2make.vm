@@ -9,25 +9,28 @@
 #parse("picard.mod.vm")
 #parse("samtools.mod.vm")
 #parse("cufflinks.mod.vm")
+#parse("jvarkit.mod.vm")
 #set($sample_id=0)
 #if(${$config.tophat.numthreads})#set( $tophat_num_threads = "${config.tophat.numthreads}" )#else#set( $tophat_num_threads = 10 )#end
 #if(${$config.cufflinks.numthreads})#set( $cufflinks_num_threads = "${config.cufflinks.numthreads}" )#else#set( $cufflinks_num_threads = $tophat_num_threads )#end
 #if(${$config.cuffmerge.numthreads})#set( $cuffmerge_num_threads = "${config.cuffmerge.numthreads}" )#else#set( $cuffmerge_num_threads = $cufflinks_num_threads )#end
 #if(${$config.cuffdiff.numthreads})#set( $cuffdiff_num_threads = "${config.cuffdiff.numthreads}" )#else#set( $cuffdiff_num_threads = $cuffdiff_num_threads )#end
+#macro(sample_dir $sample)${OUT}/Samples/${sample}#end
+#macro(accepted_hits $sample)#sample_dir(${sample})/TOPHAT/accepted_hits.bam#end
 
 
-.PHONY=all clean all_cutadpat all_fastqc0 all_tophat all_cufflinks all_cuffdiff
+.PHONY=all clean all_cutadpat all_fastqc0 all_tophat all_cufflinks all_cuffdiff all_bamstats01
 SHELL=/bin/bash
 OUT:= ${config.outdir}
 
 export PATH:=$(PATH):${bowtie_dir}:${samtools_dir}
 
 
-all: all_cuffdiff all_fastqc0
+all: all_cuffdiff all_fastqc0 all_bamstats01
 
 
 all_fastqc0: #foreach($dir in $project)#foreach($sample in ${dir.samples}) \
-	${OUT}/Samples/${sample.sample}/FASTQC0/${sample.sample}_fastqc/fastqc_report.html #end#end
+	#sample_dir(${sample.sample})/FASTQC0/${sample.sample}_fastqc/fastqc_report.html #end#end
 
 
 all_cutadpat: #foreach($dir in $project)#foreach($sample in ${dir.samples})#foreach($pair in ${sample.files}) \
@@ -36,12 +39,15 @@ all_cutadpat: #foreach($dir in $project)#foreach($sample in ${dir.samples})#fore
 
 
 all_tophat : #foreach($dir in $project)#foreach($sample in ${dir.samples}) \
-		${OUT}/Samples/${sample.sample}/TOPHAT/accepted_hits.bam #end#end
+		#accepted_hits(${sample.sample}) #end#end
 
 
 all_cufflinks : #foreach($dir in $project)#foreach($sample in ${dir.samples}) \
-		${OUT}/Samples/${sample.sample}/CUFFLINKS/transcripts.gtf #end#end
+		#sample_dir(${sample.sample})/CUFFLINKS/transcripts.gtf #end#end
 
+
+all_bamstats01 : #foreach($dir in $project)#foreach($sample in ${dir.samples}) \
+	#sample_dir(${sample.sample})/Statistics/bamstats01.tsv #end#end
 
 all_cuffdiff: #foreach($replicate1 in ${config.replicates.keySet()})
 #foreach($replicate2 in ${config.replicates.keySet()})
@@ -53,26 +59,34 @@ all_cuffdiff: #foreach($replicate1 in ${config.replicates.keySet()})
 #foreach($dir in $project)
 
 
+${OUTDIR}/BED/exons.bed: ${reference.gtf}
+	mkdir -p $(dir $@) &&
+	awk -F '	' '{printf("%s\t%d\t%s\n",$1,int($3)-1,$4);}' $< |\
+	LC_ALL=C sort -u -k1,1 -k2,2n -k3,3n > $@
+
 #foreach($replicate1 in ${config.replicates.keySet()})
 #foreach($replicate2 in ${config.replicates.keySet()})
 #if( ${replicate1.compareTo("$replicate2")} < 0 )
 #set($diffL1= $config.replicates["$replicate1"].samples )
 #set($diffL2= $config.replicates["$replicate2"].samples )
 
+#
+# cuffdiff sample '${replicate1}' vs '${replicate2}'
+#
 ${OUTDIR}/CUFFDIFF/${replicate1}_vs_${replicate2}/TODO: ${OUT}/CUFFMERGE/MERGED/merged.gtf  #foreach($S1 in $diffL1) \
-	${OUT}/Samples/${S1}/TOPHAT/accepted_hits.bam#end#foreach($S2 in $diffL2) \
-	${OUT}/Samples/${S2}/TOPHAT/accepted_hits.bam#end
+		#accepted_hits(${S1})#end#foreach($S2 in $diffL2) \
+		#accepted_hits(${S2})#end
 
 	mkdir -p $(dir $@) && \
 	${cuffdiff_exe} \
-	-o $(dir $@) \
-	-b ${reference.fasta} \
-	-p ${cuffdiff_num_threads} \
-	-L ${replicate1}_vs_${replicate2} \
-	-u \
-	$(filter %.gtf,$^) \
-	#foreach($S1 in $diffL1)#if( $velocityCount >1),#end${OUT}/Samples/${S1}/TOPHAT/accepted_hits.bam#end \
-	#foreach($S2 in $diffL2)#if( $velocityCount >1),#end${OUT}/Samples/${S2}/TOPHAT/accepted_hits.bam#end
+		-o $(dir $@) \
+		-b ${reference.fasta} \
+		-p ${cuffdiff_num_threads} \
+		-L ${replicate1}_vs_${replicate2} \
+		-u \
+		$(filter %.gtf,$^) \
+		#foreach($S1 in $diffL1)#if( $velocityCount >1),#end#accepted_hits(${S1})#end \
+		#foreach($S2 in $diffL2)#if( $velocityCount >1),#end#accepted_hits(${S2})#end
 
 #end
 #end
@@ -89,11 +103,11 @@ ${OUT}/CUFFMERGE/MERGED/merged.gtf : ${OUT}/CUFFMERGE/assemblies.txt
 	
 
 ${OUT}/CUFFMERGE/assemblies.txt:  #foreach($sample in ${dir.samples}) \
-		${OUT}/Samples/${sample.sample}/CUFFLINKS/transcripts.gtf #end
+		#sample_dir(${sample.sample})/CUFFLINKS/transcripts.gtf #end
 	
 	mkdir -p $(dir $@) && \
 	rm -f $@ #foreach($sample in ${dir.samples}) && \
-	echo "${OUT}/Samples/${sample.sample}/CUFFLINKS/transcripts.gtf" >> $@ #end
+	echo "#sample_dir(${sample.sample})/CUFFLINKS/transcripts.gtf" >> $@ #end
 
 
 #foreach($sample in ${dir.samples})
@@ -104,17 +118,17 @@ ${OUT}/CUFFMERGE/assemblies.txt:  #foreach($sample in ${dir.samples}) \
 #
 # Run FASTQC for Sample '${sample.sample}' after cutadapt
 #	
-${OUT}/Samples/${sample.sample}/FASTQC0/${sample.sample}_fastqc/fastqc_report.html : #foreach($pair in ${sample.files}) \
+#sample_dir(${sample.sample})/FASTQC0/${sample.sample}_fastqc/fastqc_report.html : #foreach($pair in ${sample.files}) \
 		#cutadapt2file(${pair.forward}) \
 		#cutadapt2file(${pair.reverse}) #end
 
-	mkdir -p ${OUT}/Samples/${sample.sample}/FASTQC0 && \
-	gunzip -c $^ | gzip > ${OUT}/Samples/${sample.sample}/FASTQC0/${sample.sample}.fastq.gz && \
+	mkdir -p #sample_dir(${sample.sample})/FASTQC0 && \
+	gunzip -c $^ | gzip > #sample_dir(${sample.sample})/FASTQC0/${sample.sample}.fastq.gz && \
 	${fastqc_exe}  \
-		-o ${OUT}/Samples/${sample.sample}/FASTQC0 \
-		${OUT}/Samples/${sample.sample}/FASTQC0/${sample.sample}.fastq.gz && \
-	rm -f	${OUT}/Samples/${sample.sample}/FASTQC0/${sample.sample}_fastqc.zip \
-		${OUT}/Samples/${sample.sample}/FASTQC0/${sample.sample}.fastq.gz
+		-o #sample_dir(${sample.sample})/FASTQC0 \
+		#sample_dir(${sample.sample})/FASTQC0/${sample.sample}.fastq.gz && \
+	rm -f	#sample_dir(${sample.sample})/FASTQC0/${sample.sample}_fastqc.zip \
+		#sample_dir(${sample.sample})/FASTQC0/${sample.sample}.fastq.gz
 
 
 #set($sample_id = $sample_id + 1)
@@ -123,9 +137,9 @@ ${OUT}/Samples/${sample.sample}/FASTQC0/${sample.sample}_fastqc/fastqc_report.ht
 #
 # Run Cufflinks for Sample '${sample.sample}'
 # 
-${OUT}/Samples/${sample.sample}/CUFFLINKS/transcripts.gtf : \
-	${reference.gtf} \
-	${OUT}/Samples/${sample.sample}/TOPHAT/accepted_hits.bam
+#sample_dir(${sample.sample})/CUFFLINKS/transcripts.gtf : \
+		${reference.gtf} \
+		#accepted_hits(${sample.sample})
 	mkdir -p $(dir $@) && \
 	${cufflinks_exe} \
 		-p ${cufflinks_num_threads} \
@@ -133,12 +147,23 @@ ${OUT}/Samples/${sample.sample}/CUFFLINKS/transcripts.gtf : \
 		-q --no-update-check -u \
 		-G ${reference.gtf} \
 		 $(filter %.bam,$^)
-	
+
+
+#
+# Run BamStats01 for Sample '${sample.sample}'
+# 	
+#sample_dir(${sample.sample})/Statistics/bamstats01.tsv : #accepted_hits(${sample.sample}) \
+		${OUTDIR}/BED/exons.bed
+	mkdir -p $(dir $@) && \
+	java -jar ${jvarkit_dir}/bamstats01.jar \
+			VALIDATION_STRINGENCY=LENIENT \
+			IN=$< \
+			BED=$(filter %.bed,$^) > $@
 
 #
 # Run Tophat for Sample '${sample.sample}'
 # 
-${OUT}/Samples/${sample.sample}/TOPHAT/accepted_hits.bam : \
+#accepted_hits(${sample.sample}) : \
 	${reference.fasta} \
 	${reference.gtf} #foreach($pair in ${sample.files}) \
 	#cutadapt2file(${pair.forward}) \
