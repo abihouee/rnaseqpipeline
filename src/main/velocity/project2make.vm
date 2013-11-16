@@ -9,12 +9,13 @@
 #parse("picard.mod.vm")
 #parse("samtools.mod.vm")
 #parse("cufflinks.mod.vm")
+#parse("bedtools.mod.vm")
 #parse("jvarkit.mod.vm")
 #set($sample_id=0)
 #if(${$config.tophat.numthreads})#set( $tophat_num_threads = "${config.tophat.numthreads}" )#else#set( $tophat_num_threads = 10 )#end
 #if(${$config.cufflinks.numthreads})#set( $cufflinks_num_threads = "${config.cufflinks.numthreads}" )#else#set( $cufflinks_num_threads = $tophat_num_threads )#end
 #if(${$config.cuffmerge.numthreads})#set( $cuffmerge_num_threads = "${config.cuffmerge.numthreads}" )#else#set( $cuffmerge_num_threads = $cufflinks_num_threads )#end
-#if(${$config.cuffdiff.numthreads})#set( $cuffdiff_num_threads = "${config.cuffdiff.numthreads}" )#else#set( $cuffdiff_num_threads = $cuffdiff_num_threads )#end
+#if(${$config.cuffdiff.numthreads})#set( $cuffdiff_num_threads = "${config.cuffdiff.numthreads}" )#else#set( $cuffdiff_num_threads = $cuffmerge_num_threads )#end
 #macro(sample_dir $sample)${OUT}/Samples/${sample}#end
 #macro(accepted_hits $sample)#sample_dir(${sample})/TOPHAT/accepted_hits.bam#end
 
@@ -23,7 +24,7 @@
 SHELL=/bin/bash
 OUT:= ${config.outdir}
 
-export PATH:=$(PATH):${bowtie_dir}:${samtools_dir}
+export PATH:=$(PATH):${bowtie_dir}:${samtools_dir}:${cufflinks_dir}
 
 
 all: all_cuffdiff all_fastqc0 all_bamstats01
@@ -49,20 +50,37 @@ all_cufflinks : #foreach($dir in $project)#foreach($sample in ${dir.samples}) \
 all_bamstats01 : #foreach($dir in $project)#foreach($sample in ${dir.samples}) \
 	#sample_dir(${sample.sample})/Statistics/bamstats01.tsv #end#end
 
-all_cuffdiff: #foreach($replicate1 in ${config.replicates.keySet()})
-#foreach($replicate2 in ${config.replicates.keySet()})
-#if( ${replicate1.compareTo("$replicate2")} < 0 ) \
-	${OUTDIR}/CUFFDIFF/${replicate1}_vs_${replicate2}/TODO #end#end#end
+all_cuffdiff: #foreach($replicate1 in ${config.replicates.keySet()})#foreach($replicate2 in ${config.replicates.keySet()})#if( ${replicate1.compareTo("$replicate2")} < 0 ) \
+	${OUT}/CUFFDIFF/${replicate1}_vs_${replicate2}/TODO #end#end#end \
+	${OUT}/CUFFDIFF/ALL/TODO
 
 
 
 #foreach($dir in $project)
 
 
-${OUTDIR}/BED/exons.bed: ${reference.gtf}
-	mkdir -p $(dir $@) &&
-	awk -F '	' '{printf("%s\t%d\t%s\n",$1,int($3)-1,$4);}' $< |\
-	LC_ALL=C sort -u -k1,1 -k2,2n -k3,3n > $@
+${OUT}/BED/exons.bed: ${reference.gtf}
+	mkdir -p $(dir $@) && \
+	awk -F '	' '{printf("%s\t%d\t%s\n",$$1,int($$4)-1,$$5);}' $< |\
+	uniq | LC_ALL=C sort -u -k1,1 -k2,2n -k3,3n | ${bedtools_bindir}/mergeBed -i - > $@
+
+#
+# cuffdiff ALL sample 
+#
+${OUT}/CUFFDIFF/ALL/TODO: ${OUT}/CUFFMERGE/MERGED/merged.gtf  #foreach($replicate1 in  ${config.replicates.keySet()})
+	#foreach($S1 in  $config.replicates["$replicate1"].samples) \
+		#accepted_hits(${S1})#end#end
+
+	mkdir -p $(dir $@) && \
+	${cuffdiff_exe} \
+		-o $(dir $@) \
+		-b ${reference.fasta} \
+		-p ${cuffdiff_num_threads} \
+		-L #foreach($replicate1 in  ${config.replicates.keySet()})#if( $velocityCount >1),#end${replicate1}#end \
+		-u \
+		$(filter %.gtf,$^) \
+		#foreach($replicate1 in  ${config.replicates.keySet()}) \
+		#foreach($S1 in  $config.replicates["$replicate1"].samples)#if( $velocityCount >1),#end#accepted_hits(${S1})#end#end
 
 #foreach($replicate1 in ${config.replicates.keySet()})
 #foreach($replicate2 in ${config.replicates.keySet()})
@@ -73,7 +91,7 @@ ${OUTDIR}/BED/exons.bed: ${reference.gtf}
 #
 # cuffdiff sample '${replicate1}' vs '${replicate2}'
 #
-${OUTDIR}/CUFFDIFF/${replicate1}_vs_${replicate2}/TODO: ${OUT}/CUFFMERGE/MERGED/merged.gtf  #foreach($S1 in $diffL1) \
+${OUT}/CUFFDIFF/${replicate1}_vs_${replicate2}/TODO: ${OUT}/CUFFMERGE/MERGED/merged.gtf  #foreach($S1 in $diffL1) \
 		#accepted_hits(${S1})#end#foreach($S2 in $diffL2) \
 		#accepted_hits(${S2})#end
 
@@ -82,7 +100,7 @@ ${OUTDIR}/CUFFDIFF/${replicate1}_vs_${replicate2}/TODO: ${OUT}/CUFFMERGE/MERGED/
 		-o $(dir $@) \
 		-b ${reference.fasta} \
 		-p ${cuffdiff_num_threads} \
-		-L ${replicate1}_vs_${replicate2} \
+		-L ${replicate1},${replicate2} \
 		-u \
 		$(filter %.gtf,$^) \
 		#foreach($S1 in $diffL1)#if( $velocityCount >1),#end#accepted_hits(${S1})#end \
@@ -97,7 +115,7 @@ ${OUT}/CUFFMERGE/MERGED/merged.gtf : ${OUT}/CUFFMERGE/assemblies.txt
 	${cuffmerge_exe} \
 		-o $(dir $@) \
 		-p ${cuffmerge_num_threads} \
-		-G ${reference.gtf} \
+		-g ${reference.gtf} \
 		-s ${reference.fasta} \
 		$<
 	
@@ -140,6 +158,7 @@ ${OUT}/CUFFMERGE/assemblies.txt:  #foreach($sample in ${dir.samples}) \
 #sample_dir(${sample.sample})/CUFFLINKS/transcripts.gtf : \
 		${reference.gtf} \
 		#accepted_hits(${sample.sample})
+	
 	mkdir -p $(dir $@) && \
 	${cufflinks_exe} \
 		-p ${cufflinks_num_threads} \
@@ -153,7 +172,7 @@ ${OUT}/CUFFMERGE/assemblies.txt:  #foreach($sample in ${dir.samples}) \
 # Run BamStats01 for Sample '${sample.sample}'
 # 	
 #sample_dir(${sample.sample})/Statistics/bamstats01.tsv : #accepted_hits(${sample.sample}) \
-		${OUTDIR}/BED/exons.bed
+		${OUT}/BED/exons.bed
 	mkdir -p $(dir $@) && \
 	java -jar ${jvarkit_dir}/bamstats01.jar \
 			VALIDATION_STRINGENCY=LENIENT \
