@@ -11,6 +11,7 @@
 #parse("cufflinks.mod.vm")
 #parse("bedtools.mod.vm")
 #parse("jvarkit.mod.vm")
+#parse("R.mod.vm")
 #set($sample_id=0)
 #if(${$config.tophat.numthreads})#set( $tophat_num_threads = "${config.tophat.numthreads}" )#else#set( $tophat_num_threads = 10 )#end
 #if(${$config.cufflinks.numthreads})#set( $cufflinks_num_threads = "${config.cufflinks.numthreads}" )#else#set( $cufflinks_num_threads = $tophat_num_threads )#end
@@ -24,7 +25,7 @@
 SHELL=/bin/bash
 OUT:= ${config.outdir}
 
-export PATH:=$(PATH):${bowtie_dir}:${samtools_dir}:${cufflinks_dir}
+export PATH:=$(PATH):${bowtie_dir}:${samtools_dir}:${cufflinks_dir}:${Rstats_bindir}
 
 
 all: all_cuffdiff all_fastqc0 all_bamstats01
@@ -47,8 +48,8 @@ all_cufflinks : #foreach($dir in $project)#foreach($sample in ${dir.samples}) \
 		#sample_dir(${sample.sample})/CUFFLINKS/transcripts.gtf #end#end
 
 
-all_bamstats01 : #foreach($dir in $project)#foreach($sample in ${dir.samples}) \
-	#sample_dir(${sample.sample})/Statistics/bamstats01.tsv #end#end
+all_bamstats01 : ${OUT}/Statistics/bamstats01.tsv
+
 
 all_cuffdiff: #foreach($replicate1 in ${config.replicates.keySet()})#foreach($replicate2 in ${config.replicates.keySet()})#if( ${replicate1.compareTo("$replicate2")} < 0 ) \
 	${OUT}/CUFFDIFF/${replicate1}_vs_${replicate2}/run.info.gz #end#end#end \
@@ -57,6 +58,12 @@ all_cuffdiff: #foreach($replicate1 in ${config.replicates.keySet()})#foreach($re
 
 
 #foreach($dir in $project)
+
+${OUT}/Statistics/bamstats01.tsv :  #foreach($dir in $project)#foreach($sample in ${dir.samples}) \
+	#sample_dir(${sample.sample})/Statistics/bamstats01.tsv #end#end
+
+	mkdir -p $(dir $@) && \
+	cat $^ | LC_ALL=C sort | uniq > $@
 
 
 ${OUT}/BED/exons.bed: ${reference.gtf}
