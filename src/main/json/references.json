@@ -4,7 +4,7 @@
   {
   "name":"mm10",
   "description":"Mus Musculus v10.0",
-  "fasta":"/commun/data/pubdb/ucsc/mm10/chromosomes/bowtie-2.0.10/mm10.fasta",
+  "fasta":"/commun/data/pubdb/ucsc/mm10/chromosomes/bowtie-1.0.0/mm10.fasta",
    "gtf":"/commun/data/pubdb/ucsc/mm10/Annotation/Archives/archive-2013-03-06-15-06-02/Genes/genes.gtf"
    }
 }
